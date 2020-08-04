@@ -11,8 +11,8 @@ def greatcircle(lat0, lon0, lat1, lon1):
     lon1 = lon1 * math.pi / 180.0;
     return 6371e3 * math.acos(math.sin(lat0) * math.sin(lat1) + math.cos(lat0) * math.cos(lat1) * math.cos(abs(lon0 - lon1)))
 
-def get_max_range(baseurl):
-    with closing(urlopen(baseurl + '/data/receiver.json', None, 5.0)) as f:
+def get_max_range(basepath):
+    with closing(open(basepath+'/receiver.json')) as f:
         receiver = json.load(f)
 
         if not (receiver.has_key('lat') and receiver.has_key('lon')):
@@ -22,7 +22,8 @@ def get_max_range(baseurl):
         rlon = receiver['lon']
 
         maxrange = None
-        with closing(urlopen(baseurl + '/data/aircraft.json', None, 5.0)) as f:
+
+        with closing(open(basepath+'/aircraft.json')) as f:
             aircraft = json.load(f)
             for ac in aircraft['aircraft']:
                 if ac.has_key('seen_pos') and ac['seen_pos'] < 300:
@@ -36,11 +37,10 @@ def get_max_range(baseurl):
 
 if __name__ == '__main__':
     import sys
-    baseurl = sys.argv[1]
-    maxrange = get_max_range(baseurl)
+    basepath = '.'
+    # basepath = '/run/dump1090-mutability'
+    maxrange = get_max_range(basepath)
 
     if maxrange is None: print 'UNKNOWN'
-    else: print '%.1f' % (maxrange / 1852.0)
-    print '0'
-    print '0'
-    print 'dump1090 at ' + baseurl
+    else: print '%.2f' % (maxrange / 1852.0)
+
